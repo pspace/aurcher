@@ -1,0 +1,34 @@
+#!/bin/sh
+PACKAGE=$1
+DSTDIR=$(readlink -f $2)
+
+if [ -z "$PACKAGE" ]; then
+    echo "No package name provided. Exiting."
+    exit 1
+fi
+
+if [ ! -d "$DSTDIR" ]; then
+    echo "No destination dir specified. Exiting."
+    exit 2
+fi
+
+TMPDIR=$(mktemp -d)
+cd $TMPDIR
+echo Building $PACKAGE in $TMPDIR
+mkdir build
+cd build 
+git clone --depth=1 https://aur.archlinux.org/$PACKAGE.git .
+if [ ! -f PKGBUILD ]; then 
+    echo "Cloning aur failed"
+    exit 2
+fi
+
+docker run  -v $TMPDIR/build:/build aurcher
+
+find "$TMPDIR/build" -type f -name "$PACKAGE*.tar.xz" -exec mv {} $DSTDIR \;
+
+read -p "Clean up? [y/n] " CLEAN
+    
+if [ $CLEAN = 'y' ]; then
+    rm -fr "$TMPDIR"
+fi

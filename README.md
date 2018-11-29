@@ -6,18 +6,13 @@ This is useful to keep your system clean from build deps, and to protect your sy
 It is also useful to build packages - e.g. `binaryninja-personal` - which require a binary distribution place into the build directory to succesfully build.
 
 ## Build
-```
-git clone --depth=1 https://github.com/pspace/aurcher.git
+```bash
+git clone --depth=1 https://github.com/pspace/aurcher.git 
 cd aurcher
-docker build . -t aurcher
+docker build . -t aurcher # repeat this whenever needed - e.g. weekly, or when the build process fails due to unavailable build dependencies
 ```
 
 ## Usage
-```
-cd ~ # or anywhere else
-mkdir build
-cd build 
-git clone --depth=1 https://aur.archlinux.org/$PACKAGE.git .
-docker run  -v `pwd`/build:/build aurcher
-# an arch package should bave been built inside the build directory
+```bash
+/PATH/TO/aurcher <package-name> <dst dir for prepared package .tar.xz>
 ```
