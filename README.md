@@ -15,4 +15,8 @@ docker build . -t aurcher # repeat this whenever needed - e.g. weekly, or when t
 ## Usage
 ```bash
 /PATH/TO/aurcher <package-name> <dst dir for prepared package .tar.xz>
+#Expected result: a ready-to-install arch package in the destination folder
+
+#install package with
+sudo pacman -U <dst dir>/<freshly created>.tar.xz
 ```
