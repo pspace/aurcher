@@ -19,3 +19,10 @@ docker build . -t aurcher # repeat this whenever needed - e.g. weekly, or when t
 #install package with
 sudo pacman -U <dst dir>/<freshly created>.tar.xz
 ```
+```shell
+# aurcher -h                          
+Usage: aurcher [-d DESTINATION] [-f FILES] [-k] PACKAGE
+-d: built package will be moved into the directory DESTINATION. Defaults to '.'
+-f: file or directory with files that will be copied to the build dir. Useful for building packages that require a proprietary blob. 
+-k: Keep build files in /tmp
+```

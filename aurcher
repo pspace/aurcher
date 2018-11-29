@@ -1,10 +1,53 @@
 #!/bin/sh
-PACKAGE=$1
-DSTDIR=$(readlink -f $2)
+
+PTIND=1 
+PACKAGE=
+DSTDIR='.'
+CLEAN='n'
+FILE=''
+
+function show_help {
+    echo "Usage: aurcher [-d DESTINATION] [-f FILES] [-k] PACKAGE"
+    echo "-d: built package will be moved into the directory DESTINATION. Defaults to '.'"
+    echo "-f: file or directory with files that will be copied to the build dir. Useful for building packages that require a proprietary blob. "
+    echo "-k: Keep build files in /tmp"
+    echo
+}
+
+while getopts "d:hkf:" opt; do
+  case $opt in
+   d)
+      DSTDIR="$OPTARG"
+      ;;
+   h)
+      show_help
+      exit 0
+      ;;
+   k)
+     CLEAN='y'
+     ;;
+   f)
+     FILE=$(readlink -f "$OPTARG")
+     ;;
+   \?)
+      echo "Invalid option: -$OPT" >&2
+      show_help
+      exit 99 
+      ;;
+  esac
+done
+
+shift $(($OPTIND-1))
+PACKAGE="$1"
+
+DSTDIR=$(readlink -f $DSTDIR)
 
 if [ -z "$PACKAGE" ]; then
+    show_help
+
     echo "No package name provided. Exiting."
     exit 1
+
 fi
 
 if [ ! -d "$DSTDIR" ]; then
@@ -16,6 +59,8 @@ TMPDIR=$(mktemp -d)
 cd $TMPDIR
 echo Building $PACKAGE in $TMPDIR
 mkdir build
+
+
 cd build 
 git clone --depth=1 https://aur.archlinux.org/$PACKAGE.git .
 if [ ! -f PKGBUILD ]; then 
@@ -23,12 +68,14 @@ if [ ! -f PKGBUILD ]; then
     exit 2
 fi
 
+if [ ! -z "$FILE" ]; then
+    find "$FILE" -type f -exec cp {} "$TMPDIR/build" \;
+fi
+
 docker run  -v $TMPDIR/build:/build aurcher
 
 find "$TMPDIR/build" -type f -name "$PACKAGE*.tar.xz" -exec mv {} $DSTDIR \;
 
-read -p "Clean up? [y/n] " CLEAN
-    
 if [ $CLEAN = 'y' ]; then
     rm -fr "$TMPDIR"
 fi
